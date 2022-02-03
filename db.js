@@ -34,6 +34,8 @@ const recipe = [
     }
 ];
 
+const getRecipe = () => recipe
+
 const getOneRecipe = (recipeid) => {
     const getOneRecipe = recipe.find((m) =>
         m.id == recipeid);
@@ -69,6 +71,7 @@ const updateRecipe = (updateId, payload) => {
 
 module.exports = {
     recipe,
+    getRecipe,
     getOneRecipe,
     addRecipe,
     deleteRecipe,

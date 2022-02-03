@@ -13,7 +13,7 @@ app.get("/", (req, res) => {
 
 //get all recipes
 app.get("/recipe", (req, res) => {
-    const recipe = db.recipe;
+    const recipe = db.getRecipe();
     return res.send(recipe);
 });
 
