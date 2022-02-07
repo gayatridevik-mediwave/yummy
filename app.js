@@ -19,7 +19,6 @@ app.listen(port, (err) => {
         console.log(`cannot running on ${port}`);
         process.exit(1);
     }
-
     console.log(`server running on ${port}`);
 });
 

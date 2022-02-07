@@ -109,29 +109,98 @@ router.post("/", (req, res) => {
 });
 
 // //update a recipe
-// router.put("/:id", (req, res) => {
-//     const payload = req.body;
-//     if (!payload.recipe_name ||
-//         !payload.food_type ||
-//         !payload.img_url ||
-//         !payload.img_alt ||
-//         !payload.ing_req ||
-//         !payload.steps_to_prepare ||
-//         !payload.descriptiion) {
-//         return res.status(404).send({
-//             message: "Enter all details about recipe",
-//         });
-//     }
 
-//     const updateOneRecipe = db.prepare(
-//         `SELECT yr.recipe_id ID,
-//             yr.recipe_name Recipe,
-//             yr.food_type,
-//             ri.img_url Image,
-//             ri.img_alt Imgalt,
-//             rid.ing_reg`
-//     )
-// })
+router.put("/:id", (req, res) => {
+    const payload = req.body;
+    if (!payload.recipe_name ||
+        !payload.food_type ||
+        !payload.img_url ||
+        !payload.img_alt ||
+        !payload.ing_req ||
+        !payload.steps_to_prepare ||
+        !payload.description) {
+        return res.status(404).send({
+            message: "Enter all details about recipe",
+        });
+    }
+
+    const updateOneRecipe = db.prepare(
+        `SELECT yr.recipe_id ID,
+            yr.recipe_name Recipe,
+            yr.food_type,
+            ri.img_url Image,
+            ri.img_alt Imgalt,
+            rid.ing_reg,
+            rid steps_to_prepare,
+            rid description) 
+            FROM 
+            yummy_recipe yr
+            INNER JOIN recipe_image ri
+            ON yr.recipe_id = ri recipe_id
+            INNER JOIN yummy_recipe_desc yrd
+            ON yr.recipe_id = yrd.recipe_id
+            WHERE yr.recipe_id =?;`
+    )
+        .get(req.params.id);
+    if (!updateOneRecipe) {
+        return res.status(404).send({
+            message: `[req.params.id] recipe not found`,
+        });
+    }
+    db.prepare(
+        `UPDATE yummy_recipe
+        SET
+        recipe_name= @recipe_name,
+        food_type = @ food_type,
+        WHERE 
+        recipe_id = @ recipe_id;`
+    )
+        .run({
+            recipe_id: req.params.id,
+            recipe_name: payload.recipe_name,
+            food_type: payload.food_type,
+        });
+
+    db.prepare(
+        `UPDATE recipe_image
+            SET
+            recipe_id = @ recipe_id
+            img_url = @ img_url
+            img_alt = @ img_alt
+            WHERE 
+            recipe_id: @recipe_id`
+    ).run({
+        recipe_id: req.params.recipe_id,
+        img_url: payload.img_url,
+        img_alt: payload.img_alt,
+    });
+
+    db.prepare(
+        `UPDATE  yummy_recipe_desc
+        SET 
+        recipe_id = @recipe_id
+        ing_req = @ ing_req
+        steps_to_prepare = @ steps_to_prepare
+        WHERE 
+        recipe_id: @recipe_id`
+    ).run({
+        recipe_id: req.params.recipe_id,
+        ing_req: payload.ing_req,
+        steps_to_prepare: payload.steps_to_prepare,
+        desc: payload.desc,
+    });
+    console.log(JSON.stringify(payload));
+    return res.status(201).send({
+        recipe_id: req.params.recipe_id,
+        recipe_name: req.params.recipe_name,
+        food_type: req.params.food_type,
+        img_url: req.params.img_url,
+        img_alt: req.params.img_alt,
+        ing_req: req.params.ing_req,
+        steps_to_prepare: req.params.steps_to_prepare,
+        desc: req.params.desc,
+    });
+});
 
 //delete a recipe
 router.delete("/:id", (req, res) => {
