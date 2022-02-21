@@ -1,0 +1,12 @@
+version: '3.4'
+
+services:
+  yummy:
+    image: yummy
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+    ports:
+      - 1703:1703
